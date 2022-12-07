@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const path = require("path");
 const http = require("http");
 const bodyParser = require('body-parser');
@@ -18,12 +19,15 @@ const plylistSpotifyR = require("./routes/plylistSpotify");
 const tracksSpotufyPlR = require("./routes/tracksSpotufyPl");
 const trackMyPlylistR = require("./routes/trackMyPlylist");
 const stripeRoute = require("./routes/stripe");
+const send = require('./routes/sendWhatsapp');
 
 const app = express();
 // דואג שכל מידע משתקבל או יוצא בברירת מחדל יהיה בפורמט ג'ייסון
 app.use(express.json());
 // להגדיר את תקיית פאבליק כתקייה של צד לקוח בשביל שנוכל לשים שם תמונות, ודברים של צד לקוח
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(cookieParser());
 
 // שניתן לבצע בקשה מדפדפן מכל דומיין ולא דווקא הדומיין של השרת שלנו
 app.all('*', function(req, res, next) {
@@ -35,7 +39,10 @@ app.all('*', function(req, res, next) {
     next();
 });
 var cors = require('cors');
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:4200'],
+    credentials: true
+}));
 app.use("/", spotifyR);
 app.use("/users", usersR);
 app.use("/artists", artistsR)
@@ -48,6 +55,7 @@ app.use("/trackMyPlylist", trackMyPlylistR);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/payment", stripeRoute);
+// app.use("/send", send);
 
 
 
